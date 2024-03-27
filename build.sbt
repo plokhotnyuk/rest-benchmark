@@ -1,12 +1,12 @@
-val http4sVersion = "0.23.25"
+val http4sVersion = "0.23.26"
 val blazeVersion = "0.23.16"
-val tapirVersion = "1.9.9"
+val tapirVersion = "1.10.0"
 val http4sNettyVersion = "0.5.12"
-val catsEffectVersion = "3.5.3"
-val fs2Version = "3.9.4"
+val catsEffectVersion = "3.6-bb17ea2"
+val fs2Version = "3.10.1"
 val zioHttpVersion = "3.0.0-RC2"
 val zioVersion = "2.0.21"
-val gatlingVersion = "3.10.3"
+val gatlingVersion = "3.10.5"
 val logbackVersion = "1.4.14"
 
 // compiler options explicitly disabled from https://github.com/DavidGregory084/sbt-tpolecat

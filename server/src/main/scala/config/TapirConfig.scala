@@ -31,7 +31,7 @@ object TapirConfig {
   private val tsBlEndpoint = endpoint.get
     .in("ts-blocking")
     .out(stringBody)
-  //private val tsBlServerEndpoint = tsBlEndpoint.serverLogicSuccess(_ => IO.blocking(Thread.sleep(200.millis)) >> IO.realTime.map(_.toMillis.toString))
+  //private val tsBlServerEndpoint = tsBlEndpoint.serverLogicSuccess(_ => IO.blocking(Thread.sleep(200)) >> IO.realTime.map(_.toMillis.toString))
   private val tsBlServerEndpoint = tsBlEndpoint.serverLogicSuccess(_ => IO(Thread.sleep(200)).evalOn(blEC) >> IO.realTime.map(_.toMillis.toString))
   private val zioTsServerEndpoint: ZServerEndpoint[Any, Any] =
     tsEndpoint.serverLogicSuccess(_ => ClockLive.currentTime(TimeUnit.MILLISECONDS).map(_.toString))
