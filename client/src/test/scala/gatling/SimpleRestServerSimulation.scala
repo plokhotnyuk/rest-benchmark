@@ -17,17 +17,17 @@ class SimpleRestServerSimulation extends Simulation {
     .disableUrlEncoding
     .disableCaching
 
-  def helloRequests(name: String): ChainBuilder = during(300.seconds)(pace(1000.millis).exec(
-    http(name).get("/ts").check(
+  def helloRequests(name: String): ChainBuilder = during(60.seconds)(pace(1000.millis).exec(
+    exec(http(name).get("/ts").check(
       bodyString.transform { ts =>
         hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
       }
-    ),
-    http(name).get("/ts-blocking").check(
+    )),
+    exec(http(name).get("/ts-blocking").check(
       bodyString.transform { ts =>
         hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
       }
-    )
+    ))
   ))
 
   private val warmup = scenario("REST warmup")
