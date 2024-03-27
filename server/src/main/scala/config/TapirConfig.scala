@@ -40,7 +40,7 @@ object TapirConfig {
     .serverLog(None)
     .options
   private val routes = Http4sServerInterpreter[IO](serverOptions)
-    .toRoutes(tsServerEndpoint)
+    .toRoutes(tsServerEndpoint :: tsBlServerEndpoint :: Nil)
 
   def service: HttpApp[IO] = Router("/" -> routes).orNotFound
 
