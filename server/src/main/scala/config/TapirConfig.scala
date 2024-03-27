@@ -17,14 +17,22 @@ import sttp.tapir.*
 import zio.Clock.ClockLive
 import zio.{Console, ZIO}
 
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContext
 
 /** Config shared among blaze/ember tapir CE/ZIO servers */
 object TapirConfig {
+  private val blEC = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
   private val tsEndpoint = endpoint.get
     .in("ts")
     .out(stringBody)
   private val tsServerEndpoint = tsEndpoint.serverLogicSuccess(_ => IO.realTime.map(_.toMillis.toString))
+  private val tsBlEndpoint = endpoint.get
+    .in("ts-blocking")
+    .out(stringBody)
+  //private val tsBlServerEndpoint = tsBlEndpoint.serverLogicSuccess(_ => IO.blocking(Thread.sleep(200.millis)) >> IO.realTime.map(_.toMillis.toString))
+  private val tsBlServerEndpoint = tsBlEndpoint.serverLogicSuccess(_ => IO(Thread.sleep(200)).evalOn(blEC) >> IO.realTime.map(_.toMillis.toString))
   private val zioTsServerEndpoint: ZServerEndpoint[Any, Any] =
     tsEndpoint.serverLogicSuccess(_ => ClockLive.currentTime(TimeUnit.MILLISECONDS).map(_.toString))
   private val serverOptions = Http4sServerOptions

@@ -17,8 +17,13 @@ class SimpleRestServerSimulation extends Simulation {
     .disableUrlEncoding
     .disableCaching
 
-  def helloRequests(name: String): ChainBuilder = during(60.seconds)(pace(1.millis).exec(
+  def helloRequests(name: String): ChainBuilder = during(300.seconds)(pace(1000.millis).exec(
     http(name).get("/ts").check(
+      bodyString.transform { ts =>
+        hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
+      }
+    ),
+    http(name).get("/ts-blocking").check(
       bodyString.transform { ts =>
         hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
       }
@@ -26,7 +31,7 @@ class SimpleRestServerSimulation extends Simulation {
   ))
 
   private val warmup = scenario("REST warmup")
-    .exec(helloRequests("GET /ts warmup"))
+    .exec(helloRequests("GET /ts and /ts-blocking warmup"))
     .exec(pause(3.seconds)) // waiting for closing of all connections before measurement
     .exec({
       session =>
@@ -36,7 +41,7 @@ class SimpleRestServerSimulation extends Simulation {
     .inject(config.injectionPolicy)
 
   private val measurement = scenario("REST measurement")
-    .exec(helloRequests("GET /ts measurement"))
+    .exec(helloRequests("GET /ts and /ts-blocking measurement"))
     .inject(config.injectionPolicy)
 
   setUp(
@@ -53,7 +58,7 @@ object SimpleRestServerSimulation {
   })
 
   object config {
-    val numberOfUsers = 500
+    val numberOfUsers = 1000
 
     val restServerUri = "http://172.16.255.3:8888"
 
