@@ -18,12 +18,12 @@ class SimpleRestServerSimulation extends Simulation {
     .disableCaching
 
   def helloRequests(name: String): ChainBuilder = during(60.seconds)(pace(1000.millis).exec(
-    exec(http(name).get("/ts").check(
+    exec(http(name + " /ts").get("/ts").check(
       bodyString.transform { ts =>
         hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
       }
     )),
-    exec(http(name).get("/ts-blocking").check(
+    exec(http(name + " /ts-blocking").get("/ts-blocking").check(
       bodyString.transform { ts =>
         hist.recordValue(Math.max(System.currentTimeMillis() - ts.toLong, 0))
       }
@@ -31,7 +31,7 @@ class SimpleRestServerSimulation extends Simulation {
   ))
 
   private val warmup = scenario("REST warmup")
-    .exec(helloRequests("GET /ts and /ts-blocking warmup"))
+    .exec(helloRequests("Warmup GET"))
     .exec(pause(3.seconds)) // waiting for closing of all connections before measurement
     .exec({
       session =>
@@ -41,7 +41,7 @@ class SimpleRestServerSimulation extends Simulation {
     .inject(config.injectionPolicy)
 
   private val measurement = scenario("REST measurement")
-    .exec(helloRequests("GET /ts and /ts-blocking measurement"))
+    .exec(helloRequests("Measurement GET"))
     .inject(config.injectionPolicy)
 
   setUp(
