@@ -27,7 +27,7 @@ object TapirConfig {
   private val tsEndpoint = endpoint.get
     .in("ts")
     .out(stringBody)
-  private val tsServerEndpoint = tsEndpoint.serverLogicSuccess(_ => IO.realTime.map(_.toMillis.toString))
+  private val tsServerEndpoint = tsEndpoint.serverLogicSuccess(_ => IO(()).replicateA_(10) >> IO.realTime.map(_.toMillis.toString))
   private val tsBlEndpoint = endpoint.get
     .in("ts-blocking")
     .out(stringBody)
