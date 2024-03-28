@@ -16,6 +16,7 @@ import sttp.tapir.ztapir.ZServerEndpoint
 import sttp.tapir.*
 import zio.Clock.ClockLive
 import zio.{Console, ZIO}
+import cats.syntax.all.*
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -27,7 +28,7 @@ object TapirConfig {
   private val tsEndpoint = endpoint.get
     .in("ts")
     .out(stringBody)
-  private val tsServerEndpoint = tsEndpoint.serverLogicSuccess(_ => IO.realTime.map(_.toMillis.toString).replicateA_(42))
+  private val tsServerEndpoint = tsEndpoint.serverLogicSuccess(_ => List.fill(100)(IO(())).parSequence_ >> IO.realTime.map(_.toMillis.toString))
   private val tsBlEndpoint = endpoint.get
     .in("ts-blocking")
     .out(stringBody)
